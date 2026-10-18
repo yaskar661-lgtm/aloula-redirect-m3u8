@@ -84,6 +84,33 @@ def dynamic_m3u8_redirect(channel_id):
 
     return redirect(target_url, code=302)
 
+@app.route('/restart/<int:channel_id>', methods=['GET', 'POST'])
+def restart_channel(channel_id):
+    """Belirli bir kanalın cache verisini sıfırlar."""
+    if channel_id in cache:
+        del cache[channel_id]
+        return jsonify({
+            "status": "success",
+            "message": f"Kanal {channel_id} için cache başarıyla sıfırlandı.",
+            "channel_id": channel_id
+        }), 200
+    
+    return jsonify({
+        "status": "not_found",
+        "message": f"Kanal {channel_id} için aktif bir cache bulunamadı.",
+        "channel_id": channel_id
+    }), 404
+
+@app.route('/restart/all', methods=['GET', 'POST'])
+def restart_all():
+    """Tüm kanalların cache verilerini tamamen sıfırlar."""
+    global cache
+    cache.clear()
+    return jsonify({
+        "status": "success",
+        "message": "Tüm kanalların cache verileri başarıyla temizlendi."
+    }), 200
+
 if __name__ == '__main__':
     import os
     port = int(os.environ.get("PORT", 5000))
